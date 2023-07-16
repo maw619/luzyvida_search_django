@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %} 
+ 
+<!-- home.html -->
+<h1>Select a Book:</h1>
+<form method="POST">
+    {% csrf_token %}
+    <select name="id" id="book-dropdown">
+        <option value="">Select a book</option>
+        {% for book in libro %}
+        <option value="{{ book.id }}">{{ book.name }}</option>
+        {% endfor %}
+    </select>
+    <br><br>
+    <select name="chapter" id="chapter-dropdown" disabled>
+        <option value="">Select a chapter</option>
+    </select>
+    <br><br>
+    <select name="verse" id="verse-dropdown" disabled>
+        <option value="">Select a verse</option>
+    </select>
+    <br><br>
+ 
+</form>
+
+<div id="data"></div>
+
+<script>
+    const bookDropdown = document.getElementById('book-dropdown');
+    const chapterDropdown = document.getElementById('chapter-dropdown');
+    const verseDropdown = document.getElementById('verse-dropdown');
+    const dataDiv = document.getElementById('data');
+
+    bookDropdown.addEventListener('change', () => {
+        const selectedBookId = bookDropdown.value;
+        if (selectedBookId) {
+            chapterDropdown.disabled = false;
+            verseDropdown.disabled = true;
+            fetch(`/get-chapters?book_id=${selectedBookId}`)
+                .then(response => response.json())
+                .then(data => {
+                    chapterDropdown.innerHTML = '<option value="">Select a chapter</option>';
+                    verseDropdown.innerHTML = '<option value="">Select a verse</option>';
+                    data.forEach(chapter => {
+                        const option = document.createElement('option');
+                        option.value = chapter.id;
+                        option.text = chapter.numero;
+                        chapterDropdown.appendChild(option);
+                    });
+                });
+        } else {
+            chapterDropdown.disabled = true;
+            verseDropdown.disabled = true;
+            chapterDropdown.innerHTML = '<option value="">Select a chapter</option>';
+            verseDropdown.innerHTML = '<option value="">Select a verse</option>';
+        }
+    });
+
+    chapterDropdown.addEventListener('change', () => {
+        const selectedChapterId = chapterDropdown.value;
+        if (selectedChapterId) {
+            verseDropdown.disabled = false;
+            fetch(`/get-verses?chapter_id=${selectedChapterId}`)
+                .then(response => response.json())
+                .then(data => {
+                    verseDropdown.innerHTML = '<option value="">Select a verse</option>';
+                    data.forEach(verse => {
+                        const option = document.createElement('option');
+                        option.value = verse.id;
+                        option.text = verse.numero;
+                        verseDropdown.appendChild(option);
+                    });
+                    displayVerses(data);
+                });
+        } else {
+            verseDropdown.disabled = true;
+            verseDropdown.innerHTML = '<option value="">Select a verse</option>';
+            dataDiv.textContent = '';
+        }
+    });
+
+    function displayVerses(verses) {
+        let versesHtml = '';
+        verses.forEach(verse => {
+            versesHtml += `<p>${verse.numero}: ${verse.contenido}</p>`;
+        });
+        dataDiv.innerHTML = versesHtml;
+    }
+</script>
+
+
+ 
+    {% comment %} <h1>Select a Book:</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <select name="id" id="id">
+            {% for book in libro %}
+            <option value="{{ book.id }}">{{ book.name }}</option>
+            {% endfor %}
+        </select>
+
+   <button type="submit">Submit</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ 
+  {% endcomment %}
+
+{% endblock content %}
+
+
+

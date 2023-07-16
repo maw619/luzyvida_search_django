@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form method="GET" action="{% url 'search_bible' %}" style="width:50%;" class="form-inline">
+    {{ form }}
+    <input type="text" id="query" name="query" class="form-control"><br>
+    <button type="submit" class="btn btn-secondary">Search</button>
+</form>
+ 
+ 
+{% if results %}
+<p>total result: {{count}}</p>
+{% for x in results %}
+    <form action="" method="post">
+        <div class="card" style="width: 78rem;"> 
+            <div class="card-body">
+                <h6 class="card-title"><b>{{ x.capitulo.libro.name }}</b> | chapter: {{ x.capitulo }} | verse: {{ x.numero }} </h6>
+                <h6></h6> 
+                <p class="card-text">{{x.headline| safe}}</p>
+                {% comment %} <p class="card-text">{{ x.contenido }}</p> {% endcomment %}
+                <a href="{% url 'detailed_view' x.capitulo.numero x.capitulo.libro.name %}" >Continue Reading ...</a>
+                <br>
+               
+            {% comment %} {{ x.rank}}
+                <div style="width:30%;"> 
+                    <div class="progress" role="progressbar" aria-label="Success example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-success" style="width: {{ x.multiplied_rank }}%">{{ x.multiplied_rank }}%</div>
+                    </div>
+                </div> {% endcomment %}
+            </div>
+        </div>
+    </form>
+    
+{% endfor %}
+
+{% else %}
+<p>No results found.</p>
+{% endif %}
+{% endblock content %}
